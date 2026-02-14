@@ -9,6 +9,26 @@
     padding: var(--spacing-xl) 0;
 }
 
+.header-buttons {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: center;
+    margin-top: var(--spacing-lg);
+    flex-wrap: wrap;
+}
+
+.btn-export {
+    background: linear-gradient(135deg, rgba(0, 255, 209, 0.15), rgba(0, 212, 255, 0.15));
+    border-color: var(--neon-teal);
+    color: var(--neon-teal);
+}
+
+.btn-export:hover {
+    background: linear-gradient(135deg, rgba(0, 255, 209, 0.25), rgba(0, 212, 255, 0.25));
+    box-shadow: 0 0 30px rgba(0, 255, 209, 0.5);
+    transform: translateY(-2px) scale(1.05);
+}
+
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -407,4 +427,28 @@
     .week-number {
         font-size: 2rem;
     }
+}
+
+/* Chart Cards */
+.chart-card {
+    padding: var(--spacing-xl);
+    min-height: 400px;
+}
+
+.chart-card h3 {
+    margin-bottom: var(--spacing-lg);
+}
+
+/* Recharts Customization */
+.recharts-surface {
+    filter: drop-shadow(0 0 10px rgba(0, 255, 209, 0.2));
+}
+
+.recharts-text {
+    fill: #00FFD1 !important;
+    font-family: 'Orbitron', sans-serif !important;
+}
+
+.recharts-tooltip-wrapper {
+    z-index: 1000;
 }

@@ -1,4 +1,9 @@
 import './AnalysisResults.css';
+import { BarChart, Bar, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import CountUp from 'react-countup';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import { motion } from 'framer-motion';
 
 const AnalysisResults = ({ data, onReset }) => {
     const { analysis, detected_skills } = data;
@@ -13,20 +18,51 @@ const AnalysisResults = ({ data, onReset }) => {
         return 'danger';
     };
 
+    // PDF Export Handler
+    const handleExportPDF = async () => {
+        const element = document.getElementById('results-content');
+        const canvas = await html2canvas(element, { scale: 2 });
+        const imgData = canvas.toDataURL('image/png');
+
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save('KAPP_Career_Analysis.pdf');
+    };
+
+    // Prepare chart data
+    const domainChartData = Object.entries(analysis.domain_strength_breakdown)
+        .sort(([, a], [, b]) => b - a)
+        .map(([domain, score]) => ({ name: domain, value: score }));
+
+    const roleChartData = Object.entries(analysis.role_match_breakdown)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 5)
+        .map(([role, score]) => ({ name: role, value: score }));
+
+    const colors = ['#00FFD1', '#00D4FF', '#8B5CF6', '#FFD700', '#FF006E'];
+
     return (
         <div className="results-page">
-            <div className="container">
+            <div className="container" id="results-content">
                 {/* Header */}
                 <header className="results-header fade-in">
                     <h1>YOUR CAREER ANALYSIS</h1>
                     <p className="subtitle">The analysis is complete. Your optimal career path has been identified.</p>
-                    <button className="btn" onClick={onReset}>Analyze Another Resume</button>
+                    <div className="header-buttons">
+                        <button className="btn btn-export" onClick={handleExportPDF}>📄 Export to PDF</button>
+                        <button className="btn" onClick={onReset}>Analyze Another Resume</button>
+                    </div>
                 </header>
 
                 {/* Main Stats */}
                 <div className="stats-grid fade-in">
                     <div className="stat-card primary">
-                        <div className="stat-value">{analysis.general_strength_score}</div>
+                        <div className="stat-value">
+                            <CountUp end={analysis.general_strength_score} duration={2} suffix="%" />
+                        </div>
                         <div className="stat-label">General Strength Score</div>
                         <div className="progress-bar">
                             <div
@@ -37,7 +73,9 @@ const AnalysisResults = ({ data, onReset }) => {
                     </div>
 
                     <div className="stat-card">
-                        <div className="stat-value">{analysis.market_alignment_score}</div>
+                        <div className="stat-value">
+                            <CountUp end={analysis.market_alignment_score} duration={2} suffix="%" />
+                        </div>
                         <div className="stat-label">Market Alignment</div>
                         <div className="progress-bar">
                             <div
@@ -170,46 +208,79 @@ const AnalysisResults = ({ data, onReset }) => {
 
                 {/* Domain & Role Breakdown */}
                 <div className="grid grid-2">
-                    <div className="card fade-in">
+                    <motion.div
+                        className="card fade-in chart-card"
+                        initial={{ opacity: 0, y: 50 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.2 }}
+                    >
                         <h3>🏆 DOMAIN STRENGTH BREAKDOWN</h3>
                         <div className="divider"></div>
-                        {Object.entries(analysis.domain_strength_breakdown)
-                            .sort(([, a], [, b]) => b - a)
-                            .map(([domain, score]) => (
-                                <div key={domain} className="breakdown-item">
-                                    <div className="breakdown-label">{domain}</div>
-                                    <div className="breakdown-bar">
-                                        <div
-                                            className="breakdown-fill"
-                                            style={{ width: `${(score / Math.max(...Object.values(analysis.domain_strength_breakdown))) * 100}%` }}
-                                        >
-                                            <span className="breakdown-score">{score}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                    </div>
+                        <ResponsiveContainer width="100%" height={300}>
+                            <RadarChart data={domainChartData}>
+                                <PolarGrid stroke="#00FFD1" strokeOpacity={0.3} />
+                                <PolarAngleAxis
+                                    dataKey="name"
+                                    stroke="#00FFD1"
+                                    style={{ fontSize: '12px', fontFamily: 'Orbitron' }}
+                                />
+                                <PolarRadiusAxis stroke="#00FFD1" strokeOpacity={0.3} />
+                                <Radar
+                                    dataKey="value"
+                                    stroke="#00FFD1"
+                                    fill="#00FFD1"
+                                    fillOpacity={0.6}
+                                    animationDuration={1500}
+                                />
+                                <Tooltip
+                                    contentStyle={{
+                                        background: 'rgba(0, 0, 0, 0.9)',
+                                        border: '1px solid #00FFD1',
+                                        borderRadius: '12px',
+                                        color: '#00FFD1',
+                                        fontFamily: 'Orbitron'
+                                    }}
+                                />
+                            </RadarChart>
+                        </ResponsiveContainer>
+                    </motion.div>
 
-                    <div className="card fade-in">
+                    <motion.div
+                        className="card fade-in chart-card"
+                        initial={{ opacity: 0, y: 50 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.4 }}
+                    >
                         <h3>💼 ROLE MATCH BREAKDOWN</h3>
                         <div className="divider"></div>
-                        {Object.entries(analysis.role_match_breakdown)
-                            .sort(([, a], [, b]) => b - a)
-                            .slice(0, 5)
-                            .map(([role, score]) => (
-                                <div key={role} className="breakdown-item">
-                                    <div className="breakdown-label">{role}</div>
-                                    <div className="breakdown-bar">
-                                        <div
-                                            className="breakdown-fill"
-                                            style={{ width: `${(score / Math.max(...Object.values(analysis.role_match_breakdown))) * 100}%` }}
-                                        >
-                                            <span className="breakdown-score">{score}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                    </div>
+                        <ResponsiveContainer width="100%" height={300}>
+                            <BarChart data={roleChartData} layout="vertical">
+                                <CartesianGrid strokeDasharray="3 3" stroke="#00FFD1" strokeOpacity={0.2} />
+                                <XAxis type="number" stroke="#00FFD1" />
+                                <YAxis
+                                    type="category"
+                                    dataKey="name"
+                                    stroke="#00FFD1"
+                                    width={120}
+                                    style={{ fontSize: '11px', fontFamily: 'Orbitron' }}
+                                />
+                                <Tooltip
+                                    contentStyle={{
+                                        background: 'rgba(0, 0, 0, 0.9)',
+                                        border: '1px solid #00FFD1',
+                                        borderRadius: '12px',
+                                        color: '#00FFD1',
+                                        fontFamily: 'Orbitron'
+                                    }}
+                                />
+                                <Bar dataKey="value" animationDuration={1500} radius={[0, 8, 8, 0]}>
+                                    {roleChartData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                                    ))}
+                                </Bar>
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </motion.div>
                 </div>
 
                 {/* Footer */}
