@@ -1,28 +1,33 @@
 import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import './App.css';
-import LandingPage from './components/LandingPage';
-import AnalysisResults from './components/AnalysisResults';
+
+// Layout
+import Navbar from './components/Layout/Navbar';
+import Footer from './components/Layout/Footer';
+
+// Pages
+import HomePage from './Pages/HomePage';
+import AnalyzePage from './Pages/AnalyzePage';
+import FeaturesPage from './Pages/FeaturesPage';
+import AboutPage from './Pages/AboutPage';
 import LoadingScreen from './components/LoadingScreen';
 
-function App() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [currentView, setCurrentView] = useState('landing'); // 'landing' or 'results'
-  const [analysisData, setAnalysisData] = useState(null);
-  const [loading, setLoading] = useState(false);
+// ScrollToTop component to handle view position on route change
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+};
 
+function AppContent() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Initial fake loader for the "App" boot up
   const handleLoadingComplete = () => {
     setIsLoading(false);
-  };
-
-  const handleAnalysisComplete = (data) => {
-    setAnalysisData(data);
-    setCurrentView('results');
-    setLoading(false);
-  };
-
-  const handleReset = () => {
-    setCurrentView('landing');
-    setAnalysisData(null);
   };
 
   return (
@@ -30,27 +35,37 @@ function App() {
       {isLoading ? (
         <LoadingScreen onComplete={handleLoadingComplete} />
       ) : (
-        <>
+        <div className="app-container">
+          {/* Animated Background - Global */}
           <div className="desert-background">
             <iframe src="/background.html" title="Animated Background"></iframe>
           </div>
-          <div className="App">
-            {currentView === 'landing' ? (
-              <LandingPage
-                onAnalysisComplete={handleAnalysisComplete}
-                loading={loading}
-                setLoading={setLoading}
-              />
-            ) : (
-              <AnalysisResults
-                data={analysisData}
-                onReset={handleReset}
-              />
-            )}
-          </div>
-        </>
+
+          <Navbar />
+
+          <ScrollToTop />
+
+          <main className="main-content">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/analyze" element={<AnalyzePage />} />
+              <Route path="/features" element={<FeaturesPage />} />
+              <Route path="/about" element={<AboutPage />} />
+            </Routes>
+          </main>
+
+          <Footer />
+        </div>
       )}
     </>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
   );
 }
 

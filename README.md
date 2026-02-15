@@ -520,7 +520,7 @@ This project is licensed under the MIT License.
 
 ## 👥 Team
 
-Built with ❤️ for the hackathon by [@rajkaran126](https://github.com/rajkaran126)
+Built with ❤️ for the hackathon by Prajwal S Hangaragi
 
 ---
 
