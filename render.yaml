@@ -1,0 +1,35 @@
+services:
+  # Backend Service
+  - type: web
+    name: kapp-backend
+    env: python
+    region: singapore
+    plan: free
+    branch: master
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: GEMINI_API_KEY
+        sync: false  # You must add this manually in Render Dashboard
+
+  # Frontend Service (Static Site)
+  - type: static
+    name: kapp-frontend
+    env: static
+    branch: master
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: kapp-backend
+          property: url
