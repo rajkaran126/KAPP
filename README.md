@@ -42,11 +42,16 @@
 ### Backend Intelligence
 
 - **🧠 Multi-Agent Architecture**
+  - `AIGradingAgent`: **[NEW]** Powered by **Gemini 2.5 Flash**. Provides context-aware grading, FAANG-level evaluation, and detailed justifications.
   - `SkillAgent`: Extracts and categorizes skills with depth analysis
   - `RoleAgent`: Matches profile to 30+ tech roles with confidence scoring
   - `RoadmapAgent`: Generates personalized 4-week career development plans
   - `SynergyAgent`: Analyzes skill combinations and career alignment
   - `RiskAgent`: Assesses competitive positioning and market fit
+
+- **🛡️ Resilience & Reliability**
+  - **Smart Retries**: auto-handles API rate limits (429 errors).
+  - **Simulation Mode**: If Google API fails, the system seamlessly falls back to a high-fidelity local simulation that mimics AI scoring logic.
 
 - **📈 Advanced Analytics**
   - General strength scoring (0-100)
